@@ -13,3 +13,11 @@ Redmine::Plugin.register :redmine_email_only_owner do
     permission :email_only_owner, {}, :public => true
   end
 end
+
+# Patches to the Redmine core.
+require 'dispatcher'
+
+Dispatcher.to_prepare :redmine_email_only_owner do
+  require_dependency 'issue'
+  Issue.send(:include, EmailOnlyOwner::Patches::IssuePatch)
+end
