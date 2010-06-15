@@ -7,8 +7,10 @@ class EmailOnlyOwner::Patches::IssuePatchTest < ActiveSupport::TestCase
       @author = User.generate_with_protected!
       @assignee = User.generate_with_protected!
       @project_member = User.generate_with_protected!
-      @role = Role.generate!
-      Member.generate!(:roles => [@role], :user_id => @project_member.id, :project => @project, :mail_notification => true)
+      @role = Role.generate!(:permissions => [:view_issues])
+      Member.generate!(:roles => [@role], :principal => @author, :project => @project, :mail_notification => true)
+      Member.generate!(:roles => [@role], :principal => @project_member, :project => @project, :mail_notification => true)
+      Member.generate!(:roles => [@role], :principal => @assignee, :project => @project, :mail_notification => true)
 
       @issue = Issue.generate!(:author => @author, :assigned_to => @assignee, :project => @project, :tracker => @project.trackers.first)
     end
@@ -48,6 +50,9 @@ class EmailOnlyOwner::Patches::IssuePatchTest < ActiveSupport::TestCase
       @issue = Issue.generate!(:author => @author, :assigned_to => @assignee, :project => @project, :tracker => @project.trackers.first)
       @issue.add_watcher(@watcher1)
       @issue.add_watcher(@watcher2)
+      @role = Role.generate!(:permissions => [:view_issues])
+      Member.generate!(:roles => [@role], :principal => @watcher1, :project => @project, :mail_notification => true)
+      Member.generate!(:roles => [@role], :principal => @watcher2, :project => @project, :mail_notification => true)
     end
 
     context "with the module disabled" do
